@@ -50,3 +50,14 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# IDE related
+.vscode/
+.idea/
+
+# binaries
+bin/
+
+# runs
+run/
+tmp/
