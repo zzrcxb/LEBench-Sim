@@ -6,41 +6,41 @@
 #include <stdbool.h>
 
 #ifndef DISABLE_TIMER
-#ifdef USE_RDTSCP
-void start_timer(TimeType *ts) {
-    *ts = rdtscp_begin();
-}
+    #ifdef USE_RDTSCP
+        // measure execution time with rdtscp
+        // "https://www.intel.com/content/dam/www/public/us/en/documents/
+        // white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf"
+        void _start_timer(TimeType *ts) {
+            *ts = rdtscp_begin();
+        }
 
-void stop_timer(TimeType *ts) {
-    *ts = rdtscp_end();
-}
+        void _stop_timer(TimeType *ts) {
+            *ts = rdtscp_end();
+        }
 
-// in CPU cycles
-double get_duration(TimeType *start, TimeType *end) {
-    return *end - *start;
-}
+        double _get_duration(TimeType *start, TimeType *end) {
+            return *end - *start; // in CPU cycles
+        }
+    #else
+        // measure execution time with Linux gettime
+        void _start_timer(TimeType *ts) {
+            clock_gettime(CLOCK_MONOTONIC, ts);
+        }
 
-#else // USE_RDTSCP
+        void _stop_timer(TimeType *ts) {
+            clock_gettime(CLOCK_MONOTONIC, ts);
+        }
 
-void start_timer(TimeType *ts) {
-    clock_gettime(CLOCK_MONOTONIC, ts);
-}
-
-void stop_timer(TimeType *ts) {
-    clock_gettime(CLOCK_MONOTONIC, ts);
-}
-
-// in nano seconds
-double get_duration(TimeType *start, TimeType *end) {
-    return get_timespec_diff_nsec(start, end);
-}
-
-#endif // USE_RDTSCP
-
+        double _get_duration(TimeType *start, TimeType *end) {
+            return get_timespec_diff_nsec(start, end); // in nano seconds
+        }
+    #endif // USE_RDTSCP
 #else // DISABLE_TIMER
-void start_timer(TimeType *ts) {}
-void stop_timer(TimeType *ts) {}
-double get_duration(TimeType *start, TimeType *end) { assert(false); }
+    // disable time measurement; it is useful if you are measuring the
+    // CPI within ROIs in a simulator
+    void _start_timer(TimeType *ts) { assert(false); }
+    void _stop_timer(TimeType *ts) { assert(false); }
+    double _get_duration(TimeType *start, TimeType *end) { assert(false); }
 #endif // DISABLE_TIMER
 
 uint64_t rdtscp_begin() {

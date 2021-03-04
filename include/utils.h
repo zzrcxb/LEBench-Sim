@@ -16,22 +16,32 @@
 
 // timing related
 #ifndef DISABLE_TIMER
-#ifdef USE_RDTSCP
-typedef uint64_t TimeType;
-#define TIME_UNIT "cyc."
-#else // USE_RDTSCP
-typedef struct timespec TimeType;
-#define TIME_UNIT "ns"
-#endif // USE_RDTSCP
-
+    #ifdef USE_RDTSCP
+        typedef uint64_t TimeType;
+        #define TIME_UNIT "cyc."
+    #else // USE_RDTSCP
+        typedef struct timespec TimeType;
+        #define TIME_UNIT "ns"
+    #endif // USE_RDTSCP
 #else // DISABLE_TIMER
-typedef uint64_t TimeType;
-#define TIME_UNIT "cyc."
+    // just put something here to pass compilation
+    typedef uint64_t TimeType;
+    #define TIME_UNIT "cyc."
 #endif // DISABLE_TIMER
 
-void start_timer(TimeType *ts);
-void stop_timer(TimeType *ts);
-double get_duration(TimeType *start, TimeType *end);
+void _start_timer(TimeType *ts);
+void _stop_timer(TimeType *ts);
+double _get_duration(TimeType *start, TimeType *end);
+
+#ifndef DISABLE_TIMER
+    #define start_timer(TS) (_start_timer(TS))
+    #define stop_timer(TS) (_stop_timer(TS))
+    #define get_duration(DEST, START, END) (DEST = _get_duration(START, END))
+#else
+    #define start_timer(TS) {}
+    #define stop_timer(TS) {}
+    #define get_duration(DEST, START, END) {}
+#endif
 
 uint64_t rdtscp_begin();
 uint64_t rdtscp_end();
