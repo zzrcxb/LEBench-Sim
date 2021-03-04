@@ -83,7 +83,7 @@ double get_timespec_diff_nsec(struct timespec *tstart, struct timespec *tend) {
     }
 }
 
-// data process related
+// data processing related
 #define MAX_ITER 5
 #define TOLERANCE 3
 void aggregate(double *data, size_t size, double *mean, double *stddiv,

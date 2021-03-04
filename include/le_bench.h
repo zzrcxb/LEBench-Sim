@@ -13,17 +13,23 @@
 #define ZWARN  "[\033[33m WARN\033[0m] "
 #define ZERROR "[\033[31mERROR\033[0m] "
 
+
 typedef enum {
     TEST,
     SMALL,
     MEDIUM,
     LARGE
-} InputSize;
+} TestInputSize;
 
+typedef enum {
+    SIMSMALL,
+    SIMLARGE,
+    NATIVE
+} SuiteInputSize;
 
 typedef struct BenchConfig {
     size_t iter;
-    InputSize i_size;
+    TestInputSize i_size;
 } BenchConfig;
 
 typedef struct BenchResult {

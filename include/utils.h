@@ -49,19 +49,19 @@ uint64_t rdtscp_end();
 double get_timespec_diff_sec(struct timespec *tstart, struct timespec *tend);
 double get_timespec_diff_nsec(struct timespec *tstart, struct timespec *tend);
 
-// roi related
+// Region-Of-Interests (ROI) related
 inline void roi_begin() {
     fprintf(stderr, "=== ROI Begin ===\n");
 #ifdef GEM5_HOOK
     m5_work_begin(0, 0);
-    m5_reset_stats(0,0);
+    m5_reset_stats(0, 0);
 #endif
 }
 
 inline void roi_end() {
 #ifdef GEM5_HOOK
     m5_work_end(0, 0);
-    m5_dump_stats(0,0);
+    m5_dump_stats(0, 0);
 #endif
     fprintf(stderr, "=== ROI End ===\n");
 }
