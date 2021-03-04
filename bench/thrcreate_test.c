@@ -25,11 +25,11 @@ void thread_create_test(BenchConfig *config, BenchResult *res) {
         start_timer(&tstart);
         int UNUSED err = pthread_create(&new_thrd, NULL, t_func, &t_child_end);
         stop_timer(&t_parent_end);
+
         pthread_join(new_thrd, NULL);
-#ifndef DISABLE_TIMER
-        parent_diffs[idx] = get_duration(&tstart, &t_parent_end);
-        child_diffs[idx] = get_duration(&tstart, &t_child_end);
-#endif
+
+        get_duration(parent_diffs[idx], &tstart, &t_parent_end);
+        get_duration(child_diffs[idx], &tstart, &t_child_end);
     }
     roi_end();
 

@@ -58,10 +58,8 @@ void fork_test(BenchConfig *config, BenchResult *res) {
             res->errored = true;
             return;
         }
-#ifndef DISABLE_TIMER
-        parent_diffs[idx] = get_duration(&tstart, &t_parent_end);
-        child_diffs[idx] = get_duration(&tstart, t_child_end);
-#endif
+        get_duration(parent_diffs[idx], &tstart, &t_parent_end);
+        get_duration(child_diffs[idx], &tstart, t_child_end);
     }
     roi_end();
 

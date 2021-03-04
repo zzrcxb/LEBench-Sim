@@ -14,11 +14,11 @@ void getpid_test(BenchConfig *config, BenchResult *res) {
     roi_begin();
     for (size_t idx = 0; idx < iter_cnt; idx++) {
         start_timer(&tstart);
+
         syscall(SYS_getpid);
+
         stop_timer(&tend);
-#ifndef DISABLE_TIMER
-        diffs[idx] = get_duration(&tstart, &tend);
-#endif
+        get_duration(diffs[idx], &tstart, &tend);
     }
     roi_end();
 

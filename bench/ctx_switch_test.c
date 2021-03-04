@@ -85,12 +85,12 @@ void context_switch_test(BenchConfig *config, BenchResult *res) {
         roi_begin();
         for (size_t idx = 0; idx < config->iter; idx++) {
             start_timer(&tstart);
+
             _unused = write(fds1[1], &writer, 1);
             _unused = read(fds2[0], &reader, 1);
+
             stop_timer(&tend);
-#ifndef DISABLE_TIMER
-            diffs[idx] = get_duration(&tstart, &tend);
-#endif
+            get_duration(diffs[idx], &tstart, &tend);
         }
         roi_end();
 
