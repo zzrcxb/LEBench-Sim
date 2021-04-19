@@ -23,14 +23,14 @@ Run a pre-defined workload:
 `<workload ID>`, a non-negative integer, selects a pre-defined workload to execute.
 
 `<scale>`, a positive integer, used to increase the number of iterations of the workload.
-For example, by default, `context-switch` executes 200 times.
-If the scale is set to `10`, it now will execute 2000 times.
+For example, by default, `context-switch` executes `200` times.
+If the scale is set to `10`, it now will execute `2000` times.
 It is an useful option if you are running it natively
 and want to increase the number of measurements for a better precision.
 But, it is better to keep it small if you are running it in gem5,
 otherwise it will take a long time to finish.
 
-The complete list of pre-defined workloads:
+A complete list of pre-defined workloads:
 |ID |  Workload Name  |ID |  Workload Name  |ID |  Workload Name  |
 |---| ----------------|---| ----------------|---| ----------------|
 |0  | context-switch  |8  | munmap          |16 | small-select    |
