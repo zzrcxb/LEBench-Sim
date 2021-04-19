@@ -41,7 +41,7 @@ $(OBJ)/%.h.o: $(SRC)/%.c
 
 $(OBJ)/lib/m5ops.o: $(SRC)/lib/m5op_x86.S
 	@mkdir -p $(@D)
-	$(CC) $(M5FLAGS) -o $@ -c $<
+	$(CC) $(M5FLAGS) -MMD -o $@ -c $<
 
 clean:
 	rm -rf $(BIN)/ $(OBJ)/
