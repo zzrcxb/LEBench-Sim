@@ -57,6 +57,7 @@ dkms.conf
 
 # binaries
 bin/
+obj/
 
 # runs
 run/
