@@ -2,6 +2,7 @@
 
 #include <le_bench.h>
 #include <utils.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <time.h>
 
@@ -30,6 +31,7 @@ void thread_create_test(BenchConfig *config, BenchResult *res) {
 
         get_duration(parent_diffs[idx], &tstart, &t_parent_end);
         get_duration(child_diffs[idx], &tstart, &t_child_end);
+        usleep(TEST_INTERVAL);
     }
     roi_end();
 

@@ -22,7 +22,7 @@ void getpid_test(BenchConfig *config, BenchResult *res) {
     }
     roi_end();
 
-    // process resultss
+    // process results
     collect_results(diffs, iter_cnt, config, res);
 
     // clean up

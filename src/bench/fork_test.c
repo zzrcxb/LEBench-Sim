@@ -16,10 +16,10 @@ void fork_test(BenchConfig *config, BenchResult *res) {
     TimeType tstart, t_parent_end;
 
     switch (config->i_size) {
-        case TEST:   iter_cnt /= 50; break;
-        case SMALL:  break;
-        case MEDIUM: iter_cnt /= 5; page_cnt = 6000; break;
-        case LARGE:  iter_cnt /= 10; page_cnt = 12000; break;
+        case TEST: break;
+        case SMALL: break;
+        case MEDIUM: page_cnt = 3000; break;
+        case LARGE: page_cnt = 6000; break;
         default: assert(false);
     }
 
@@ -56,10 +56,14 @@ void fork_test(BenchConfig *config, BenchResult *res) {
         } else {
             fprintf(stderr, ZERROR"Failed to fork;\n");
             res->errored = true;
+            munmap(t_child_end, sizeof(TimeType));
+            free(child_diffs);
+            free(parent_diffs);
             return;
         }
         get_duration(parent_diffs[idx], &tstart, &t_parent_end);
         get_duration(child_diffs[idx], &tstart, t_child_end);
+        usleep(TEST_INTERVAL);
     }
     roi_end();
 

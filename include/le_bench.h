@@ -14,6 +14,12 @@
 #define ZERROR "[\033[31mERROR\033[0m] "
 
 
+#ifndef DISABLE_TIMER
+#define TEST_INTERVAL 1  // micro-second
+#else
+#define TEST_INTERVAL 0  // micro-second
+#endif
+
 typedef enum {
     TEST,
     SMALL,
@@ -53,6 +59,8 @@ void thread_create_test(BenchConfig*, BenchResult*);
 
 void mmap_test(BenchConfig*, BenchResult*);
 
+void munmap_test(BenchConfig*, BenchResult*);
+
 void page_fault_test(BenchConfig*, BenchResult*);
 
 void read_test(BenchConfig*, BenchResult*);
@@ -65,6 +73,8 @@ void epoll_test(BenchConfig*, BenchResult*);
 
 void select_test(BenchConfig*, BenchResult*);
 
-void send_recv_test(BenchConfig*, BenchResult*);
+void send_test(BenchConfig*, BenchResult*);
+
+void recv_test(BenchConfig*, BenchResult*);
 
 #endif
