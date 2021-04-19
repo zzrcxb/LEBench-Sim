@@ -34,7 +34,7 @@ typedef struct BenchConfig {
 
 typedef struct BenchResult {
     BenchConfig *config;
-    double mean, stddiv, max, min, k_closest;
+    double mean, stddev, max, min, k_closest;
     bool errored;
 
     // do forget to free the child

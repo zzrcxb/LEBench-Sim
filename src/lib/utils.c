@@ -86,10 +86,10 @@ double get_timespec_diff_nsec(struct timespec *tstart, struct timespec *tend) {
 // data processing related
 #define MAX_ITER 5
 #define TOLERANCE 3
-void aggregate(double *data, size_t size, double *mean, double *stddiv,
+void aggregate(double *data, size_t size, double *mean, double *stddev,
                double *max, double *min) {
-    double avg = 0.0, div = 0.0;
-    double _avg = 0.0, _stddiv = 0.0;
+    double avg = 0.0, dev = 0.0;
+    double _avg = 0.0, _stddev = 0.0;
 
     bool changed = true;
     size_t iter = 0, removed = 0;
@@ -99,10 +99,10 @@ void aggregate(double *data, size_t size, double *mean, double *stddiv,
         changed = iter == 0;
         removed = 0;
         avg = 0.0;
-        div = 0.0;
+        dev = 0.0;
 
         for (size_t idx = 0; idx < size; idx++) {
-            if (iter == 0 || fabs(data[idx] - _avg) < TOLERANCE * _stddiv) {
+            if (iter == 0 || fabs(data[idx] - _avg) < TOLERANCE * _stddev) {
                 avg += data[idx] / (double)size;
                 *max = data[idx] > *max ? data[idx] : *max;
                 *min = data[idx] < *min ? data[idx] : *min;
@@ -117,15 +117,15 @@ void aggregate(double *data, size_t size, double *mean, double *stddiv,
         size -= removed;
 
         for (size_t idx = 0; idx < size; idx++) {
-            if (iter == 0 || fabs(data[idx] - _avg) < 3 * _stddiv) {
-                div += ((data[idx] - avg) / size) * (data[idx] - avg);
+            if (iter == 0 || fabs(data[idx] - _avg) < TOLERANCE * _stddev) {
+                dev += ((data[idx] - avg) / size) * (data[idx] - avg);
             }
         }
 
         _avg = avg;
-        _stddiv = sqrt(div);
+        _stddev = sqrt(dev);
 
-        if (_avg < 1e-3 || _stddiv / _avg < 1e-3) {
+        if (_avg < 1e-3 || _stddev / _avg < 1e-3) {
             break;
         }
 
@@ -135,13 +135,13 @@ void aggregate(double *data, size_t size, double *mean, double *stddiv,
     if (size != 0) {
         *mean = avg;
         if (size == 1) {
-            *stddiv = 0;
+            *stddev = 0;
         } else {
-            *stddiv = sqrt(div);
+            *stddev = sqrt(dev);
         }
     } else {
         *mean = NAN;
-        *stddiv = NAN;
+        *stddev = NAN;
         *max = NAN;
         *min = NAN;
     }
@@ -184,7 +184,7 @@ void collect_results(double *data, size_t size, BenchConfig* config,
     res->child = NULL;
     res->errored = false;
 #ifndef DISABLE_TIMER
-    aggregate(data, size, &res->mean, &res->stddiv, &res->max, &res->min);
+    aggregate(data, size, &res->mean, &res->stddev, &res->max, &res->min);
     res->k_closest = closest_k(data, size, CLOSEST_K);
 #endif
 }
