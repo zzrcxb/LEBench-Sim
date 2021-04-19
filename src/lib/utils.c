@@ -93,18 +93,19 @@ void aggregate(double *data, size_t size, double *mean, double *stddev,
     double _avg = 0.0, _stddev = 0.0;
 
     bool changed = true;
-    size_t iter = 0, removed = 0;
+    size_t iter = 0, removed = 0, valid_size = size;
     while (iter < MAX_ITER && changed) {
         *max = LLONG_MIN;
         *min = LLONG_MAX;
         changed = iter == 0;
         removed = 0;
+        valid_size = size;
         avg = 0.0;
         dev = 0.0;
 
         for (size_t idx = 0; idx < size; idx++) {
             if (iter == 0 || fabs(data[idx] - _avg) < TOLERANCE * _stddev) {
-                avg += data[idx] / (double)size;
+                avg += data[idx] / (double)valid_size;
                 *max = data[idx] > *max ? data[idx] : *max;
                 *min = data[idx] < *min ? data[idx] : *min;
             } else {
@@ -114,15 +115,25 @@ void aggregate(double *data, size_t size, double *mean, double *stddev,
         }
 
         // account for the removed
-        avg *= (size / (size - removed));
-        size -= removed;
+        valid_size -= removed;
+        if (valid_size) {
+            avg *= (valid_size + removed) / valid_size;
+        } else {
+            fprintf(stderr,
+                    ZWARN "Too much noise! Stick to results from iteration: %lu\n",
+                    iter - 1);
+            avg = _avg;
+            dev = _stddev * _stddev;
+            break;
+        }
 
         for (size_t idx = 0; idx < size; idx++) {
             if (iter == 0 || fabs(data[idx] - _avg) < TOLERANCE * _stddev) {
-                dev += ((data[idx] - avg) / size) * (data[idx] - avg);
+                dev += ((data[idx] - avg) / valid_size) * (data[idx] - avg);
             }
         }
 
+        // save the results for next iteration
         _avg = avg;
         _stddev = sqrt(dev);
 

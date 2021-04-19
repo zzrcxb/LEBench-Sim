@@ -67,7 +67,7 @@ inline void roi_end() {
 }
 
 // data processing related
-void aggregate(double *data, size_t size, double *mean, double *stddiv,
+void aggregate(double *data, size_t size, double *mean, double *stddev,
                double *max, double *min);
 
 double closest_k(double *data, size_t size, unsigned int k);
