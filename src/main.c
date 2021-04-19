@@ -97,8 +97,6 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    set_affinity_priority(0, -20);
-
     BenchConfig config;
     BenchResult res;
     res.child = NULL;
