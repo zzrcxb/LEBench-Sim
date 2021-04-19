@@ -56,7 +56,8 @@ uint64_t rdtscp_begin() {
 
 uint64_t rdtscp_end() {
     uint32_t lo, hi;
-    asm volatile ("rdtscp\n\t"
+    asm volatile ("cpuid\n\t"
+                  "rdtscp\n\t"
                   "mov %%edx, %0\n\t"
                   "mov %%eax, %1\n\t"
                   "cpuid\n\t"
