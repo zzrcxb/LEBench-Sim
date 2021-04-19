@@ -9,7 +9,7 @@
 #include <sys/resource.h>
 
 
-bool set_affinity_priority(uint core, int prio) {
+inline bool set_affinity_priority(uint core, int prio) {
     cpu_set_t set;
     CPU_ZERO(&set);
     CPU_SET(0, &set);
@@ -53,6 +53,7 @@ void context_switch_test(BenchConfig *config, BenchResult *res) {
     if (r1 || r2) {
         fprintf(stderr, ZERROR"Failed to create pipes; r1: %d, r2: %d\n", r1, r2);
         res->errored = true;
+        free(diffs);
         return;
     }
 
@@ -60,6 +61,7 @@ void context_switch_test(BenchConfig *config, BenchResult *res) {
     if (!save_affinity_priority(false)) {
         fprintf(stderr, ZERROR"Failed to save affinity & priority;\n");
         res->errored = true;
+        free(diffs);
         return;
     }
 
@@ -72,12 +74,14 @@ void context_switch_test(BenchConfig *config, BenchResult *res) {
         if (r1 || r2) {
             fprintf(stderr, ZERROR"Failed to close pipes; r1: %d, r2: %d\n", r1, r2);
             res->errored = true;
+            free(diffs);
             return;
         }
 
         if (!set_affinity_priority(0, -20)) {
             fprintf(stderr, ZERROR"Failed to set affinity & priority;\n");
             res->errored = true;
+            free(diffs);
             return;
         }
 
@@ -120,18 +124,21 @@ void context_switch_test(BenchConfig *config, BenchResult *res) {
             _unused = write(fds2[1], &writer, 1);
         }
 
+        usleep(TEST_INTERVAL);
         kill(getpid(), SIGINT);
         fprintf(stderr, ZERROR"Failed to kill child process;\n");
         return;
     } else {
         fprintf(stderr, ZERROR"Failed to fork;\n");
         res->errored = true;
+        free(diffs);
         return;
     }
 
     if (!save_affinity_priority(true)) {
         fprintf(stderr, ZERROR"Failed to restore affinity & priority;\n");
         res->errored = true;
+        free(diffs);
         return;
     }
 
