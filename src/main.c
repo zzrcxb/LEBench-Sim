@@ -25,10 +25,10 @@ const TestConfig testConfigs[] = {
     (TestConfig){mmap_test, 500, MEDIUM, "mmap"},                     // 7
     (TestConfig){munmap_test, 500, MEDIUM, "munmap"},                 // 8
     (TestConfig){fork_test, 200, SMALL, "fork"},                      // 9
-    (TestConfig){fork_test, 50, LARGE, "big-fork"},                  // 10
+    (TestConfig){fork_test, 50, LARGE, "big-fork"},                   // 10
     (TestConfig){thread_create_test, 200, LARGE, "thrcreate"},        // 11
-    (TestConfig){send_test, 500, SMALL, "small-send"},                // 12
-    (TestConfig){send_test, 200, LARGE, "big-send"},                  // 13
+    (TestConfig){send_test, 200, SMALL, "small-send"},                // 12
+    (TestConfig){send_test, 100, LARGE, "big-send"},                  // 13
     (TestConfig){recv_test, 500, SMALL, "small-recv"},                // 14
     (TestConfig){recv_test, 200, LARGE, "big-recv"},                  // 15
     (TestConfig){select_test, 500, SMALL, "small-select"},            // 16
@@ -51,10 +51,9 @@ void print_results(BenchResult *p_res, char *name) {
         } else {
 #ifndef DISABLE_TIMER
             printf(
-                "%s: closest_k: %.2f %s; mean: %.2f %s; stddev: %.2f %s;"
-                "max: %.2f %s; min: %.2f %s\n",
-                name,
-                res->k_closest, TIME_UNIT, res->mean, TIME_UNIT,
+                "[Result] name: %s; closest_k: %.2f %s; mean: %.2f %s;"
+                " stddev: %.2f %s; max: %.2f %s; min: %.2f %s\n",
+                name, res->k_closest, TIME_UNIT, res->mean, TIME_UNIT,
                 res->stddev, TIME_UNIT, res->max, TIME_UNIT,
                 res->min, TIME_UNIT);
 #else
