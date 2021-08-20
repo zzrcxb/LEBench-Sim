@@ -43,8 +43,8 @@ double _get_duration(TimeType *start, TimeType *end);
     #define get_duration(DEST, START, END) {}
 #endif
 
-uint64_t rdtscp_begin();
-uint64_t rdtscp_end();
+uint64_t rdtsc_begin();
+uint64_t rdtsc_end();
 
 double get_timespec_diff_sec(struct timespec *tstart, struct timespec *tend);
 double get_timespec_diff_nsec(struct timespec *tstart, struct timespec *tend);

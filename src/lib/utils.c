@@ -11,11 +11,11 @@
         // "https://www.intel.com/content/dam/www/public/us/en/documents/
         // white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf"
         void _start_timer(TimeType *ts) {
-            *ts = rdtscp_begin();
+            *ts = rdtsc_begin();
         }
 
         void _stop_timer(TimeType *ts) {
-            *ts = rdtscp_end();
+            *ts = rdtsc_end();
         }
 
         double _get_duration(TimeType *start, TimeType *end) {
@@ -43,9 +43,9 @@
     double _get_duration(TimeType *start, TimeType *end) { assert(false); }
 #endif // DISABLE_TIMER
 
-uint64_t rdtscp_begin() {
+uint64_t rdtsc_begin() {
     uint32_t lo, hi;
-    asm volatile ("cpuid\n\t"
+    asm volatile ("mfence\n\t"
                   "rdtsc\n\t"
                   "mov %%edx, %0\n\t"
                   "mov %%eax, %1\n\t"
@@ -54,13 +54,13 @@ uint64_t rdtscp_begin() {
     return ((uint64_t)hi << 32) | lo;
 }
 
-uint64_t rdtscp_end() {
+uint64_t rdtsc_end() {
     uint32_t lo, hi;
-    asm volatile ("cpuid\n\t"
-                  "rdtscp\n\t"
+    asm volatile ("mfence\n\t"
+                  "rdtsc\n\t"
                   "mov %%edx, %0\n\t"
                   "mov %%eax, %1\n\t"
-                  "cpuid\n\t"
+                  "mfence\n\t"
                   : "=r" (hi), "=r" (lo)
                   :: "%rax", "%rbx", "%rcx", "%rdx");
     return ((uint64_t)hi << 32) | lo;
