@@ -75,7 +75,7 @@ void print_results(BenchResult *p_res, char *name) {
 inline bool set_affinity_priority(unsigned core, int prio) {
     cpu_set_t set;
     CPU_ZERO(&set);
-    CPU_SET(0, &set);
+    CPU_SET(core, &set);
     bool ret1 = sched_setaffinity(getpid(), sizeof(set), &set) != -1;
     bool ret2 = setpriority(PRIO_PROCESS, 0, prio) != -1;
     return ret1 && ret2;
