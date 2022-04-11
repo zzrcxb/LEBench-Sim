@@ -50,8 +50,13 @@ void select_test(BenchConfig *config, BenchResult *res) {
     for (size_t idy = 0; idy < iter_cnt; idy++) {
         start_timer(&tstart);
 
+#ifdef AARCH64
+        err |= syscall(SYS_pselect6, max_fd + 1, &monitored,
+                       NULL, NULL, &tv, NULL) != fd_count;
+#else
         err |= syscall(SYS_select, max_fd + 1, &monitored,
                        NULL, NULL, &tv) != fd_count;
+#endif
 
         stop_timer(&tend);
         get_duration(diffs[idy], &tstart, &tend);

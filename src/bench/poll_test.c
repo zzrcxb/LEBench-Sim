@@ -49,7 +49,11 @@ void poll_test(BenchConfig *config, BenchResult *res) {
     for (size_t idy = 0; idy < iter_cnt; idy++) {
         start_timer(&tstart);
 
+#ifdef AARCH64
+        err |= syscall(SYS_ppoll, pfds, fd_count, NULL, NULL) != fd_count;
+#else
         err |= syscall(SYS_poll, pfds, fd_count, 0) != fd_count;
+#endif
 
         stop_timer(&tend);
         get_duration(diffs[idy], &tstart, &tend);

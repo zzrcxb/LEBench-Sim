@@ -19,6 +19,12 @@ HOOK_OBJS=$(patsubst $(SRC)/%,$(OBJ)/%,$(SRCS:.c=.h.o))
 RUN_DEPS=$(patsubst $(SRC)/%,$(OBJ)/%,$(SRCS:.c=.r.d))
 HOOK_DEPS=$(patsubst $(SRC)/%,$(OBJ)/%,$(SRCS:.c=.h.d))
 
+# check aarch64
+uname_p := $(shell uname -p)
+ifeq ($(uname_p),aarch64)
+	CFLAGS += -DAARCH64
+endif
+
 .PHONY: run hook clean
 
 run:  $(RUN_OBJS)

@@ -44,6 +44,13 @@
 #endif // DISABLE_TIMER
 
 uint64_t rdtsc_begin() {
+#ifdef AARCH64
+    // https://lore.kernel.org/patchwork/patch/1305380/
+    // SPDX-License-Identifier: GPL-2.0
+    uint64_t val;
+    asm volatile("mrs %0, cntvct_el0" : "=r" (val));
+    return val;
+#else
     uint32_t lo, hi;
     asm volatile ("mfence\n\t"
                   "rdtsc\n\t"
@@ -52,9 +59,17 @@ uint64_t rdtsc_begin() {
                   : "=r" (hi), "=r" (lo)
                   :: "%rax", "%rbx", "%rcx", "%rdx");
     return ((uint64_t)hi << 32) | lo;
+#endif
 }
 
 uint64_t rdtsc_end() {
+#ifdef AARCH64
+    // https://lore.kernel.org/patchwork/patch/1305380/
+    // SPDX-License-Identifier: GPL-2.0
+    uint64_t val;
+    asm volatile("mrs %0, cntvct_el0" : "=r" (val));
+    return val;
+#else
     uint32_t lo, hi;
     asm volatile ("mfence\n\t"
                   "rdtsc\n\t"
@@ -64,6 +79,7 @@ uint64_t rdtsc_end() {
                   : "=r" (hi), "=r" (lo)
                   :: "%rax", "%rbx", "%rcx", "%rdx");
     return ((uint64_t)hi << 32) | lo;
+#endif
 }
 
 double get_timespec_diff_sec(struct timespec *tstart, struct timespec *tend) {
