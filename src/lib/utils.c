@@ -2,6 +2,7 @@
 
 #include <utils.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -111,8 +112,8 @@ void aggregate(double *data, size_t size, double *mean, double *stddev,
     bool changed = true;
     size_t iter = 0, removed = 0, valid_size = size;
     while (iter < MAX_ITER && changed) {
-        *max = LLONG_MIN;
-        *min = LLONG_MAX;
+        *max = (double)LLONG_MIN;
+        *min = (double)LLONG_MAX;
         changed = iter == 0;
         removed = 0;
         valid_size = size;
@@ -208,6 +209,12 @@ double closest_k(double *data, size_t size, unsigned int k) {
 #define CLOSEST_K 5
 void collect_results(double *data, size_t size, BenchConfig* config,
                      BenchResult *res) {
+#ifdef PRINT_RAW_DATA
+    for (size_t idx = 0; idx < size; idx++) {
+        printf("[Raw] %f\n", data[idx]);
+    }
+#endif
+
     res->config = config;
     res->child = NULL;
     res->errored = false;
