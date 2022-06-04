@@ -59,6 +59,8 @@ dkms.conf
 bin/
 obj/
 
+compile_commands.json
+
 # runs
 run/
 tmp/
