@@ -15,30 +15,30 @@ typedef struct TestConfig {
 } TestConfig;
 
 const TestConfig testConfigs[] = {
-    (TestConfig){context_switch_test, 200, LARGE, "context-switch"},  // 0
-    (TestConfig){read_test, 500, SMALL, "small-read"},                // 1
-    (TestConfig){read_test, 200, MEDIUM, "med-read"},                 // 2
-    (TestConfig){read_test, 100, LARGE, "big-read"},                  // 3
-    (TestConfig){write_test, 500, SMALL, "small-write"},              // 4
-    (TestConfig){write_test, 200, MEDIUM, "med-write"},               // 5
-    (TestConfig){write_test, 50, LARGE, "large-write"},               // 6
-    (TestConfig){mmap_test, 500, MEDIUM, "mmap"},                     // 7
-    (TestConfig){munmap_test, 500, MEDIUM, "munmap"},                 // 8
-    (TestConfig){fork_test, 200, SMALL, "fork"},                      // 9
-    (TestConfig){fork_test, 50, LARGE, "big-fork"},                   // 10
-    (TestConfig){thread_create_test, 200, LARGE, "thrcreate"},        // 11
-    (TestConfig){send_test, 200, SMALL, "small-send"},                // 12
-    (TestConfig){send_test, 100, LARGE, "big-send"},                  // 13
-    (TestConfig){recv_test, 500, SMALL, "small-recv"},                // 14
-    (TestConfig){recv_test, 200, LARGE, "big-recv"},                  // 15
-    (TestConfig){select_test, 500, SMALL, "small-select"},            // 16
-    (TestConfig){select_test, 100, LARGE, "big-select"},              // 17
-    (TestConfig){poll_test, 500, SMALL, "small-poll"},                // 18
-    (TestConfig){poll_test, 100, LARGE, "big-poll"},                  // 19
-    (TestConfig){epoll_test, 500, SMALL, "small-epoll"},              // 20
-    (TestConfig){epoll_test, 100, LARGE, "big-epoll"},                // 21
-    (TestConfig){page_fault_test, 200, SMALL, "small-pagefault"},     // 22
-    (TestConfig){page_fault_test, 100, LARGE, "big-pagefault"},       // 23
+    {context_switch_test, 200, LARGE, "context-switch"},  // 0,
+    {read_test, 500, SMALL, "small-read"},                // 1,  read
+    {read_test, 200, MEDIUM, "med-read"},                 // 2,  read
+    {read_test, 100, LARGE, "big-read"},                  // 3,  read
+    {write_test, 500, SMALL, "small-write"},              // 4,  write
+    {write_test, 200, MEDIUM, "med-write"},               // 5,  write
+    {write_test, 50, LARGE, "large-write"},               // 6,  write
+    {mmap_test, 500, MEDIUM, "mmap"},                     // 7,  mmap
+    {munmap_test, 500, MEDIUM, "munmap"},                 // 8,  munmap
+    {fork_test, 200, SMALL, "fork"},                      // 9,  fork
+    {fork_test, 50, LARGE, "big-fork"},                   // 10, fork
+    {thread_create_test, 200, LARGE, "thrcreate"},        // 11, clone
+    {send_test, 200, SMALL, "small-send"},                // 12, sendto
+    {send_test, 100, LARGE, "big-send"},                  // 13, sendto
+    {recv_test, 500, SMALL, "small-recv"},                // 14, recvfrom
+    {recv_test, 200, LARGE, "big-recv"},                  // 15, recvfrom
+    {select_test, 500, SMALL, "small-select"},            // 16, select
+    {select_test, 100, LARGE, "big-select"},              // 17, select
+    {poll_test, 500, SMALL, "small-poll"},                // 18, poll
+    {poll_test, 100, LARGE, "big-poll"},                  // 19, poll
+    {epoll_test, 500, SMALL, "small-epoll"},              // 20, epoll_wait
+    {epoll_test, 100, LARGE, "big-epoll"},                // 21, epoll_wait
+    {page_fault_test, 200, SMALL, "small-pagefault"},     // 22,
+    {page_fault_test, 100, LARGE, "big-pagefault"},       // 23,
 };
 const size_t NUM_TESTS = 24;
 
