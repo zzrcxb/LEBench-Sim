@@ -1,5 +1,4 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
 #include <math.h>
 #include <time.h>
@@ -13,6 +12,7 @@
 #endif
 
 #define UNUSED __attribute__((unused))
+#define ALWAYS_INLINE __attribute__((always_inline))
 
 // timing related
 #ifndef DISABLE_TIMER
@@ -26,7 +26,7 @@
 #else // DISABLE_TIMER
     // just put something here to pass compilation
     typedef uint64_t TimeType;
-    #define TIME_UNIT "cyc."
+    #define TIME_UNIT "n.d."
 #endif // DISABLE_TIMER
 
 void _start_timer(TimeType *ts);
@@ -43,14 +43,57 @@ double _get_duration(TimeType *start, TimeType *end);
     #define get_duration(DEST, START, END) {}
 #endif
 
-uint64_t rdtsc_begin();
-uint64_t rdtsc_end();
+ALWAYS_INLINE inline uint64_t _rdtsc_google_begin(void) {
+#ifdef AARCH64
+    // https://lore.kernel.org/patchwork/patch/1305380/
+    // SPDX-License-Identifier: GPL-2.0
+    uint64_t val;
+    asm volatile("mrs %0, cntvct_el0" : "=r" (val));
+    return val;
+#else
+    uint64_t t;
+    __asm__ __volatile__("lfence\n\t"
+                         "rdtsc\n\t"
+                         "shl $32, %%rdx\n\t"
+                         "or %%rdx, %0\n\t"
+                         "lfence"
+                         : "=a"(t)
+                         :
+                         // "memory" avoids reordering. rdx = TSC >> 32.
+                         // "cc" = flags modified by SHL.
+                         : "rdx", "memory", "cc");
+    return t;
+#endif
+}
+
+ALWAYS_INLINE inline uint64_t _rdtscp_google_end(void) {
+#ifdef AARCH64
+    // https://lore.kernel.org/patchwork/patch/1305380/
+    // SPDX-License-Identifier: GPL-2.0
+    uint64_t val;
+    asm volatile("mrs %0, cntvct_el0" : "=r" (val));
+    return val;
+#else
+    uint64_t t;
+    __asm__ __volatile__("rdtscp\n\t"
+                         "shl $32, %%rdx\n\t"
+                         "or %%rdx, %0\n\t"
+                         "lfence"
+                         : "=a"(t)
+                         :
+                         // "memory" avoids reordering.
+                         // rcx = TSC_AUX. rdx = TSC >> 32.
+                         // "cc" = flags modified by SHL.
+                         : "rcx", "rdx", "memory", "cc");
+    return t;
+#endif
+}
 
 double get_timespec_diff_sec(struct timespec *tstart, struct timespec *tend);
 double get_timespec_diff_nsec(struct timespec *tstart, struct timespec *tend);
 
 // Region-Of-Interests (ROI) related
-inline void roi_begin() {
+ALWAYS_INLINE inline void roi_begin() {
     fprintf(stderr, "=== ROI Begin ===\n");
 #ifdef GEM5_HOOK
     m5_work_begin(0, 0);
@@ -58,7 +101,7 @@ inline void roi_begin() {
 #endif
 }
 
-inline void roi_end() {
+ALWAYS_INLINE inline void roi_end() {
 #ifdef GEM5_HOOK
     m5_work_end(0, 0);
     m5_dump_stats(0, 0);
@@ -74,5 +117,3 @@ double closest_k(double *data, size_t size, unsigned int k);
 
 void collect_results(double *data, size_t size, BenchConfig* config,
                      BenchResult *res);
-
-#endif

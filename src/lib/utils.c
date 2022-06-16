@@ -8,15 +8,14 @@
 
 #ifndef DISABLE_TIMER
     #ifdef USE_RDTSCP
-        // measure execution time with rdtscp
-        // "https://www.intel.com/content/dam/www/public/us/en/documents/
-        // white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf"
+        // measure execution time with rdtsc/rdtscp
+        // https://github.com/google/highwayhash/blob/master/highwayhash/tsc_timer.h
         void _start_timer(TimeType *ts) {
-            *ts = rdtsc_begin();
+            *ts = _rdtsc_google_begin();
         }
 
         void _stop_timer(TimeType *ts) {
-            *ts = rdtsc_end();
+            *ts = _rdtscp_google_end();
         }
 
         double _get_duration(TimeType *start, TimeType *end) {
@@ -43,45 +42,6 @@
     void _stop_timer(TimeType *ts) { assert(false); }
     double _get_duration(TimeType *start, TimeType *end) { assert(false); }
 #endif // DISABLE_TIMER
-
-uint64_t rdtsc_begin() {
-#ifdef AARCH64
-    // https://lore.kernel.org/patchwork/patch/1305380/
-    // SPDX-License-Identifier: GPL-2.0
-    uint64_t val;
-    asm volatile("mrs %0, cntvct_el0" : "=r" (val));
-    return val;
-#else
-    uint32_t lo, hi;
-    asm volatile ("mfence\n\t"
-                  "rdtsc\n\t"
-                  "mov %%edx, %0\n\t"
-                  "mov %%eax, %1\n\t"
-                  : "=r" (hi), "=r" (lo)
-                  :: "%rax", "%rbx", "%rcx", "%rdx");
-    return ((uint64_t)hi << 32) | lo;
-#endif
-}
-
-uint64_t rdtsc_end() {
-#ifdef AARCH64
-    // https://lore.kernel.org/patchwork/patch/1305380/
-    // SPDX-License-Identifier: GPL-2.0
-    uint64_t val;
-    asm volatile("mrs %0, cntvct_el0" : "=r" (val));
-    return val;
-#else
-    uint32_t lo, hi;
-    asm volatile ("mfence\n\t"
-                  "rdtsc\n\t"
-                  "mov %%edx, %0\n\t"
-                  "mov %%eax, %1\n\t"
-                  "mfence\n\t"
-                  : "=r" (hi), "=r" (lo)
-                  :: "%rax", "%rbx", "%rcx", "%rdx");
-    return ((uint64_t)hi << 32) | lo;
-#endif
-}
 
 double get_timespec_diff_sec(struct timespec *tstart, struct timespec *tend) {
     if (tstart && tend) {
