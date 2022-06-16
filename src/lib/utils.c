@@ -148,7 +148,7 @@ static int double_cmp(const void *a, const void *b) {
 }
 
 #ifndef IMPRECISION
-#define IMPRECISION 0.05
+#define IMPRECISION 0.01
 #endif
 double closest_k(double *data, size_t size, unsigned int k) {
     if (size == 0) return NAN;
