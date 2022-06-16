@@ -40,7 +40,7 @@ const TestConfig testConfigs[] = {
     {page_fault_test, 200, SMALL, "small-pagefault"},     // 22,
     {page_fault_test, 100, LARGE, "big-pagefault"},       // 23,
 };
-const size_t NUM_TESTS = 24;
+const size_t NUM_TESTS = sizeof(testConfigs) / sizeof(TestConfig);
 
 void print_results(BenchResult *p_res, char *name) {
     BenchResult *res = p_res;
