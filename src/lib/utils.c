@@ -62,8 +62,13 @@ double get_timespec_diff_nsec(struct timespec *tstart, struct timespec *tend) {
 }
 
 // data processing related
+#ifndef MAX_ITER
 #define MAX_ITER 5
+#endif
+
+#ifndef TOLERANCE
 #define TOLERANCE 3
+#endif
 void aggregate(double *data, size_t size, double *mean, double *stddev,
                double *max, double *min) {
     double avg = 0.0, dev = 0.0;
@@ -142,7 +147,9 @@ static int double_cmp(const void *a, const void *b) {
     else return 0;
 }
 
+#ifndef IMPRECISION
 #define IMPRECISION 0.05
+#endif
 double closest_k(double *data, size_t size, unsigned int k) {
     if (size == 0) return NAN;
     if (size == 1) return data[0];
@@ -166,7 +173,9 @@ double closest_k(double *data, size_t size, unsigned int k) {
     return data[idx - cont_cnt];
 }
 
+#ifndef CLOSEST_K
 #define CLOSEST_K 5
+#endif
 void collect_results(double *data, size_t size, BenchConfig* config,
                      BenchResult *res) {
 #ifdef PRINT_RAW_DATA
