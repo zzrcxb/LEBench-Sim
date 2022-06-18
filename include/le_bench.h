@@ -16,12 +16,6 @@
 #define LE_FILE_PATH "/tmp/LEBench_TMP"
 #define LE_SOCK_PATH "/tmp/LEBench_SOCK"
 
-#ifndef DISABLE_TIMER
-#define TEST_INTERVAL 1  // micro-second
-#else
-#define TEST_INTERVAL 0  // micro-second
-#endif
-
 typedef enum {
     TEST,
     SMALL,
