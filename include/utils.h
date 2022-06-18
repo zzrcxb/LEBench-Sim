@@ -94,8 +94,8 @@ double get_timespec_diff_nsec(struct timespec *tstart, struct timespec *tend);
 
 // Region-Of-Interests (ROI) related
 ALWAYS_INLINE inline void roi_begin() {
-    fprintf(stderr, "=== ROI Begin ===\n");
 #ifdef GEM5_HOOK
+    fprintf(stderr, "=== ROI Begin ===\n");
     m5_work_begin(0, 0);
     m5_reset_stats(0, 0);
 #endif
@@ -105,8 +105,8 @@ ALWAYS_INLINE inline void roi_end() {
 #ifdef GEM5_HOOK
     m5_work_end(0, 0);
     m5_dump_stats(0, 0);
-#endif
     fprintf(stderr, "=== ROI End ===\n");
+#endif
 }
 
 // data processing related
