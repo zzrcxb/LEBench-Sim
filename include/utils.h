@@ -115,5 +115,10 @@ void aggregate(double *data, size_t size, double *mean, double *stddev,
 
 double closest_k(double *data, size_t size, unsigned int k);
 
-void collect_results(double *data, size_t size, BenchConfig* config,
+void collect_results(double *data, size_t size, BenchConfig *config,
                      BenchResult *res);
+
+// common functions
+int create_and_fill(char *filepath, size_t size, char c);
+
+double *init_diff_array(size_t iter_cnt);

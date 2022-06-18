@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #ifndef DISABLE_TIMER
     #ifdef USE_RDTSCP
@@ -191,4 +194,36 @@ void collect_results(double *data, size_t size, BenchConfig* config,
     aggregate(data, size, &res->mean, &res->stddev, &res->max, &res->min);
     res->k_closest = closest_k(data, size, CLOSEST_K);
 #endif
+}
+
+// common functions
+int create_and_fill(char *filepath, size_t size, char c) {
+    remove(filepath);
+    char *buf = malloc(size);
+    if (!buf) return -1;
+    memset(buf, c, size);
+
+    int fd = open(filepath, O_RDWR | O_CREAT, 0664);
+    if (fd < 0) {
+        fprintf(stderr, ZERROR "Failed to open file at %s\n", filepath);
+        goto err;
+    }
+    UNUSED char _ = write(fd, buf, size);
+
+err:
+    free(buf);
+    return fd;
+}
+
+double *init_diff_array(size_t iter_cnt) {
+    double *diffs = (double *)malloc(sizeof(double) * iter_cnt);
+    if (!diffs) {
+        fprintf(stderr, ZERROR "Out of memory\n");
+        return NULL;
+    }
+
+    for (size_t i = 0; i < iter_cnt; i++) {
+        diffs[i] = 0.0;
+    }
+    return diffs;
 }
