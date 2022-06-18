@@ -47,34 +47,34 @@ typedef struct BenchResult {
     struct BenchResult *child;
 } BenchResult;
 
-typedef void(*TestFunc_p)(BenchConfig*, BenchResult*);
+typedef bool(*TestFunc_p)(BenchConfig*, BenchResult*);
 
-void getpid_test(BenchConfig*, BenchResult*);
+bool getpid_test(BenchConfig*, BenchResult*);
 
-void context_switch_test(BenchConfig*, BenchResult*);
+bool context_switch_test(BenchConfig*, BenchResult*);
 
-void fork_test(BenchConfig*, BenchResult*);
+bool fork_test(BenchConfig*, BenchResult*);
 
-void thread_create_test(BenchConfig*, BenchResult*);
+bool thread_create_test(BenchConfig*, BenchResult*);
 
-void mmap_test(BenchConfig*, BenchResult*);
+bool mmap_test(BenchConfig*, BenchResult*);
 
-void munmap_test(BenchConfig*, BenchResult*);
+bool munmap_test(BenchConfig*, BenchResult*);
 
-void page_fault_test(BenchConfig*, BenchResult*);
+bool page_fault_test(BenchConfig*, BenchResult*);
 
-void read_test(BenchConfig*, BenchResult*);
+bool read_test(BenchConfig*, BenchResult*);
 
-void write_test(BenchConfig*, BenchResult*);
+bool write_test(BenchConfig*, BenchResult*);
 
-void poll_test(BenchConfig*, BenchResult*);
+bool poll_test(BenchConfig*, BenchResult*);
 
-void epoll_test(BenchConfig*, BenchResult*);
+bool epoll_test(BenchConfig*, BenchResult*);
 
-void select_test(BenchConfig*, BenchResult*);
+bool select_test(BenchConfig*, BenchResult*);
 
-void send_test(BenchConfig*, BenchResult*);
+bool send_test(BenchConfig*, BenchResult*);
 
-void recv_test(BenchConfig*, BenchResult*);
+bool recv_test(BenchConfig*, BenchResult*);
 
 #endif

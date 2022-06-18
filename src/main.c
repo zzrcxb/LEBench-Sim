@@ -96,17 +96,21 @@ int main(int argc, char **argv) {
         return 2;
     }
 
+    TestConfig t_config = testConfigs[idx];
     BenchConfig config;
     BenchResult res;
     res.child = NULL;
 
-    TestConfig t_config = testConfigs[idx];
 
     fprintf(stderr, ZINFO "Running \"%s\"\n", t_config.name);
 
     config.iter = t_config.iter * scale;
     config.i_size = t_config.i_size;
-    t_config.tester(&config, &res);
+    if (t_config.tester(&config, &res)) {
+        fprintf(stderr, ZERROR "Failed to run \"%s\"\n", t_config.name);
+        return 1;
+    }
 
     print_results(&res, t_config.name);
+    return 0;
 }
