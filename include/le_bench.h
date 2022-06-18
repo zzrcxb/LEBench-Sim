@@ -13,6 +13,8 @@
 #define ZWARN  "[\033[33m WARN\033[0m] "
 #define ZERROR "[\033[31mERROR\033[0m] "
 
+#define LE_FILE_PATH "/tmp/LEBench_TMP"
+#define LE_SOCK_PATH "/tmp/LEBench_SOCK"
 
 #ifndef DISABLE_TIMER
 #define TEST_INTERVAL 1  // micro-second
