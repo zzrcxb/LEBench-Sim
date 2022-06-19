@@ -13,12 +13,14 @@ static void *t_func(void *arg) {
     pthread_exit(NULL);
 }
 
-void thread_create_test(BenchConfig *config, BenchResult *res) {
+bool thread_create_test(BenchConfig *config, BenchResult *res) {
+    bool ret = false;
     TimeType tstart, t_parent_end, t_child_end;
     size_t iter_cnt = config->iter;
 
-    double *parent_diffs = (double*)malloc(iter_cnt * sizeof(double));
-    double *child_diffs = (double*)malloc(iter_cnt * sizeof(double));
+    double *parent_diffs = init_diff_array(iter_cnt);
+    double *child_diffs = init_diff_array(iter_cnt);
+    if (!parent_diffs || !child_diffs) goto err;
 
     pthread_t new_thrd;
     roi_begin();
@@ -31,17 +33,24 @@ void thread_create_test(BenchConfig *config, BenchResult *res) {
 
         get_duration(parent_diffs[idx], &tstart, &t_parent_end);
         get_duration(child_diffs[idx], &tstart, &t_child_end);
-        usleep(TEST_INTERVAL);
     }
     roi_end();
 
     // collect results
     collect_results(parent_diffs, iter_cnt, config, res);
     res->child = (BenchResult*)malloc(sizeof(BenchResult));
+    if (!res->child) {
+        fprintf(stderr, ZERROR "Failed to allocate for child results\n");
+        goto err;
+    }
     collect_results(child_diffs, iter_cnt, config, res->child);
 
-    // clean up
+cleanup:
     free(parent_diffs);
     free(child_diffs);
-    return;
+    return ret;
+
+err:
+    ret = true;
+    goto cleanup;
 }

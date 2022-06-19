@@ -9,10 +9,12 @@
 #include <sys/socket.h>
 #include <sys/syscall.h>
 
-void poll_test(BenchConfig *config, BenchResult *res) {
+bool poll_test(BenchConfig *config, BenchResult *res) {
+    bool ret = false;
     TimeType tstart, tend;
     size_t iter_cnt = config->iter;
-    double *diffs = (double*)malloc(iter_cnt * sizeof(double));
+    double *diffs = NULL;
+    struct pollfd *pfds = NULL;
 
     size_t fd_count;
     switch (config->i_size) {
@@ -24,58 +26,56 @@ void poll_test(BenchConfig *config, BenchResult *res) {
             assert(false && "Invalid input size");
     }
 
-    int fds[fd_count];
-    struct pollfd pfds[fd_count];
-    memset(pfds, 0, sizeof(pfds));
+    int *fds = malloc(fd_count * sizeof(int));
+    if (!fds) return true;
+    memset(fds, -1, fd_count * sizeof(int));
+
+    pfds = calloc(fd_count, sizeof(struct pollfd));
+    diffs = init_diff_array(iter_cnt);
+    if (!pfds || !diffs) goto err;
 
     // setup
     for (int i = 0; i < fd_count; i++) {
         int fd = socket(AF_INET, SOCK_STREAM, 0);
         if (fd < 0) {
-            fprintf(stderr, ZERROR"Failed to get a valid fd\n");
-            res->errored = true;
-            free(diffs);
-            return;
+            fprintf(stderr, ZERROR"Socket %d: failed to get a valid fd\n", i);
+            goto err;
         }
-
         pfds[i].fd = fd;
         pfds[i].events = POLLIN;
         fds[i] = fd;
     }
 
     // measure time
-    bool err = false;
     roi_begin();
     for (size_t idy = 0; idy < iter_cnt; idy++) {
         start_timer(&tstart);
-
 #ifdef AARCH64
-        err |= syscall(SYS_ppoll, pfds, fd_count, NULL, NULL) != fd_count;
+        size_t _ret = ppoll(pfds, fd_count, NULL, NULL);
 #else
-        err |= syscall(SYS_poll, pfds, fd_count, 0) != fd_count;
+        size_t _ret = poll(pfds, fd_count, 0);
 #endif
-
         stop_timer(&tend);
+
+        if (_ret != fd_count) {
+            fprintf(stderr, "Failed to run poll\n");
+            goto err;
+        }
         get_duration(diffs[idy], &tstart, &tend);
-        usleep(TEST_INTERVAL);
     }
     roi_end();
+    collect_results(diffs, iter_cnt, config, res);
 
-    if (err) {
-        fprintf(stderr, ZERROR"Failed to execute poll\n");
-        res->errored = true;
-        free(diffs);
-        return;
-    }
-
+cleanup:
     for (size_t idx = 0; idx < fd_count; idx++) {
         int UNUSED _ret = close(fds[idx]);
     }
-
-    // data processing
-    collect_results(diffs, iter_cnt, config, res);
-
-    // clean up
+    free(fds);
     free(diffs);
-    return;
+    free(pfds);
+    return ret;
+
+err:
+    ret = true;
+    goto cleanup;
 }

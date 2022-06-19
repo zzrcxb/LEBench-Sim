@@ -3,14 +3,15 @@
 #include <le_bench.h>
 #include <utils.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/syscall.h>
 
-void select_test(BenchConfig *config, BenchResult *res) {
+bool select_test(BenchConfig *config, BenchResult *res) {
+    bool ret = false;
     TimeType tstart, tend;
     size_t iter_cnt = config->iter;
-    double *diffs = (double*)malloc(iter_cnt * sizeof(double));
 
     size_t fd_count;
     switch (config->i_size) {
@@ -21,12 +22,16 @@ void select_test(BenchConfig *config, BenchResult *res) {
         default:
             assert(false && "Invalid input size");
     }
+    int *fds = malloc(fd_count * sizeof(int)), max_fd;
+    if (!fds) return true;
+    memset(fds, -1, fd_count * sizeof(int));
 
-    int fds[fd_count], max_fd;
-    fd_set monitored;
-    FD_ZERO(&monitored);
+    double *diffs = init_diff_array(iter_cnt);
+    if (!diffs) goto err;
 
     // setup fd
+    fd_set monitored;
+    FD_ZERO(&monitored);
     for (size_t idx = 0; idx < fd_count; idx++) {
         int fd = socket(AF_INET, SOCK_STREAM, 0);
         if (fd >= 0) {
@@ -34,51 +39,39 @@ void select_test(BenchConfig *config, BenchResult *res) {
             fds[idx] = fd;
             max_fd = fd > max_fd ? fd : max_fd;
         } else {
-            fprintf(stderr, ZERROR"Failed to get a valid fd\n");
-            res->errored = true;
-            return;
+            fprintf(stderr, ZERROR "Failed to get a valid fd\n");
+            goto err;
         }
     }
 
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-
-    // measure time
-    bool err = false;
+    struct timeval tv = {0, 0};
     roi_begin();
     for (size_t idy = 0; idy < iter_cnt; idy++) {
         start_timer(&tstart);
-
 #ifdef AARCH64
-        err |= syscall(SYS_pselect6, max_fd + 1, &monitored,
-                       NULL, NULL, &tv, NULL) != fd_count;
+        int _ret = pselect6(max_fd + 1, &monitored, NULL, NULL, &tv, NULL);
 #else
-        err |= syscall(SYS_select, max_fd + 1, &monitored,
-                       NULL, NULL, &tv) != fd_count;
+        int _ret = select(max_fd + 1, &monitored, NULL, NULL, &tv);
 #endif
-
         stop_timer(&tend);
+        if (_ret == -1) {
+            fprintf(stderr, "Failed to select!\n");
+            goto err;
+        }
         get_duration(diffs[idy], &tstart, &tend);
-        usleep(TEST_INTERVAL);
     }
     roi_end();
+    collect_results(diffs, iter_cnt, config, res);
 
-    if (err) {
-        fprintf(stderr, ZERROR"Failed to execute select\n");
-        res->errored = true;
-        free(diffs);
-        return;
-    }
-
+cleanup:
     for (size_t idx = 0; idx < fd_count; idx++) {
         int UNUSED _ret = close(fds[idx]);
     }
-
-    // data processing
-    collect_results(diffs, iter_cnt, config, res);
-
-    // clean up
+    free(fds);
     free(diffs);
-    return;
+    return ret;
+
+err:
+    ret = true;
+    goto cleanup;
 }

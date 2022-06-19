@@ -9,12 +9,13 @@
 #include <sys/mman.h>
 
 
-#define FILE_PATH "/tmp/LEBench_WR"
-void mmap_test(BenchConfig *config, BenchResult *res) {
+bool mmap_test(BenchConfig *config, BenchResult *res) {
+    bool ret = false; // has error?
     TimeType tstart, tend;
+    int fd = -1;
     size_t iter_cnt = config->iter;
-
-    double *diffs = (double*)malloc(iter_cnt * sizeof(double));
+    double *diffs = init_diff_array(iter_cnt);
+    if (!diffs) goto err;
 
     size_t file_size;
     switch (config->i_size) {
@@ -24,53 +25,31 @@ void mmap_test(BenchConfig *config, BenchResult *res) {
         case LARGE: file_size = 4096000; break;
         default: assert(false && "Invalid input size");
     }
+    fd = create_and_fill(LE_FILE_PATH, file_size, 'a');
+    if (fd < 0) goto err;
 
-    char *buf = (char*)malloc(sizeof(char) * file_size);
-    memset(buf, 'a', file_size);
-    buf[file_size - 1] = '\0';
-
-    remove(FILE_PATH);
-    FILE *fp = fopen(FILE_PATH, "w");
-    if (fp == NULL) {
-        fprintf(stderr, ZERROR"Failed to create file at %s\n", FILE_PATH);
-        res->errored = true;
-        free(buf);
-        free(diffs);
-        return;
-    }
-    fprintf(fp, "%s", buf);
-    fclose(fp);
-
-    int fd = open(FILE_PATH, O_RDONLY);
-    if (fd < 0) {
-        fprintf(stderr, ZERROR"Failed to read file at %s\n", FILE_PATH);
-        res->errored = true;
-        free(buf);
-        free(diffs);
-        return;
-    }
-
-    // real measurement
     roi_begin();
     for (size_t idx = 0; idx < iter_cnt; idx++) {
         start_timer(&tstart);
-
-        void *addr = (void*)syscall(SYS_mmap, NULL, file_size, PROT_READ,
-                                    MAP_PRIVATE, fd, 0);
-
+        void *addr = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
         stop_timer(&tend);
+        if (addr == MAP_FAILED) {
+            fprintf(stderr, "Failed to mmap!\n");
+            goto err;
+        }
         munmap(addr, file_size);
         get_duration(diffs[idx], &tstart, &tend);
-        usleep(TEST_INTERVAL);
     }
     roi_end();
-
     collect_results(diffs, iter_cnt, config, res);
 
+cleanup:
     close(fd);
-    remove(FILE_PATH);
-    free(buf);
     free(diffs);
+    remove(LE_FILE_PATH);
+    return ret;
 
-    return;
+err:
+    ret = true;
+    goto cleanup;
 }

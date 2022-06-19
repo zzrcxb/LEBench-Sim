@@ -8,10 +8,14 @@
 #include <sys/syscall.h>
 #include <sys/mman.h>
 
-#define FILE_PATH "/tmp/LEBench_WR"
-void munmap_test(BenchConfig *config, BenchResult *res) {
+bool munmap_test(BenchConfig *config, BenchResult *res) {
+    bool ret = false; // has error?
     TimeType tstart, tend;
+    int fd = -1;
     size_t iter_cnt = config->iter;
+    double *diffs = init_diff_array(iter_cnt);
+    if (!diffs) goto err;
+
     size_t file_size;
     switch (config->i_size) {
         case TEST: file_size = 4096; break;
@@ -20,50 +24,32 @@ void munmap_test(BenchConfig *config, BenchResult *res) {
         case LARGE: file_size = 4096000; break;
         default: assert(false && "Invalid input size");
     }
-
-    // create the temporary file to mmap
-    remove(FILE_PATH);
-    int fd = open(FILE_PATH, O_RDWR | O_CREAT, 0664);
-    if (fd < 0) {
-        fprintf(stderr, ZERROR"Failed to read file at %s\n", FILE_PATH);
-        res->errored = true;
-        goto err;
-    }
-
-    // allocate buffers and results
-    double *diffs = (double*)malloc(iter_cnt * sizeof(double));
-    char *buf = malloc(file_size);
-    if (!diffs || !buf) {
-        fprintf(stderr, ZERROR"Out of memory!\n");
-        res->errored = true;
-        goto err;
-    }
-    memset(buf, 'a', file_size);
-    UNUSED size_t _ = write(fd, buf, file_size);
+    fd = create_and_fill(LE_FILE_PATH, file_size, 'a');
+    if (fd < 0) goto err;
 
     roi_begin();
     for (size_t idx = 0; idx < iter_cnt; idx++) {
         void *addr = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
         if (addr == MAP_FAILED) {
-            fprintf(stderr, ZERROR"Failed to mmap the file\n");
-            res->errored = true;
+            fprintf(stderr, ZERROR"Failed to mmap\n");
             goto err;
         }
 
         start_timer(&tstart);
-        syscall(SYS_munmap, addr, file_size);
+        munmap(addr, file_size);
         stop_timer(&tend);
         get_duration(diffs[idx], &tstart, &tend);
-        usleep(TEST_INTERVAL);
     }
     roi_end();
     collect_results(diffs, iter_cnt, config, res);
 
-err:
+cleanup:
     close(fd);
-    remove(FILE_PATH);
+    remove(LE_FILE_PATH);
     free(diffs);
-    free(buf);
+    return ret;
 
-    return;
+err:
+    ret = true;
+    goto cleanup;
 }
